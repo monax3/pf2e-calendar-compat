@@ -1,22 +1,24 @@
 import type { TimeComponents } from 'foundry-pf2e/foundry/client/data/_types.mjs';
+
+import { ordinalString } from '../date';
+import { CalendarPF2e } from '../pf2e-calendar';
+
+import type { DateTimeFormatOptions } from './_types';
+import { prepareOptions } from './options';
 import {
+    amPm,
+    blanked,
+    eraYear,
     getDateSeparator,
     hour,
-    numeric,
-    weekday,
     month,
-    eraYear,
+    numeric,
     separated,
-    amPm,
-    blanked
+    weekday,
 } from './parts';
-import { ordinalString } from '../date';
-import { prepareOptions } from './options';
-import type { Time } from '../module';
-import type { DateTimeFormatOptions } from './_types';
 
 function dateImpl(
-    calendar: foundry.data.CalendarConfig,
+    calendar: foundry.data.CalendarData,
     components: TimeComponents,
     options: DateTimeFormatOptions,
 ): string {
@@ -28,24 +30,10 @@ function dateImpl(
         month(calendar, components, options.month),
         { type: 'separator', text: separator },
         numeric('day', components.dayOfMonth + 1, options.day),
-        { type: 'separator', text: options.month === 'long' ? ', ' : separator },
-        eraYear('AR', calendar, components, options),
-    );
-}
-
-function timeImpl(
-    calendar: foundry.data.CalendarConfig,
-    components: TimeComponents,
-    options: DateTimeFormatOptions,
-): string {
-    return separated(
-        hour(calendar, components, options),
-        { type: 'separator', text: ':' },
-        numeric('minute', components.minute, options.minute),
-        { type: 'separator', text: ':' },
-        numeric('second', components.second, options.second),
-        { type: 'separator', text: ' ' },
-        amPm(calendar, components, options),
+        ...calendar instanceof CalendarPF2e
+            ? [{ type: 'separator' as const, text: options.month === 'long' ? ', ' : separator },
+                eraYear(calendar.eraName, calendar, components, options)]
+            : [],
     );
 }
 
@@ -62,13 +50,11 @@ function dateTimeSep(options: DateTimeFormatOptions): string {
 }
 
 function parts(
-    calendar: foundry.data.CalendarConfig,
+    calendar: foundry.data.CalendarData,
     components: TimeComponents,
     options: DateTimeFormatOptions,
 ): string {
     const sep = dateTimeSep(options);
-
-    console.warn(options);
 
     return separated(
         blanked('dateStyle', dateImpl(calendar, components, options)),
@@ -77,35 +63,51 @@ function parts(
     );
 }
 
+function timeImpl(
+    calendar: foundry.data.CalendarData,
+    components: TimeComponents,
+    options: DateTimeFormatOptions,
+): string {
+    return separated(
+        hour(calendar, components, options),
+        { type: 'separator', text: ':' },
+        numeric('minute', components.minute, options.minute),
+        { type: 'separator', text: ':' },
+        numeric('second', components.second, options.second),
+        { type: 'separator', text: ' ' },
+        amPm(calendar, components, options),
+    );
+}
+
 export function date(
-    calendar: foundry.data.CalendarConfig,
+    calendar: foundry.data.CalendarData,
     components: TimeComponents,
     options?: Intl.DateTimeFormatOptions,
 ): string {
     return dateImpl(calendar, components, prepareOptions(options));
 }
 
+export function intl(calendar: foundry.data.CalendarData, components: TimeComponents, options?: DateTimeFormatOptions): string {
+    const opts = prepareOptions(options);
+    return parts(calendar, components, opts);
+}
+
+export function system(calendar: foundry.data.CalendarData, components: TimeComponents, options?: object): string {
+    return `${game.i18n.format(CONFIG.PF2E.worldClock.Date, {
+        day: ordinalString(components.dayOfMonth + 1),
+        era: calendar instanceof CalendarPF2e ? calendar.eraName : '',
+        month: separated(month(calendar, components, 'long')),
+        weekday: separated(weekday(calendar, components, 'long')),
+        year: components.year,
+    })
+    } (${time(calendar, components, { timeStyle: 'full' })
+    })`;
+}
+
 export function time(
-    calendar: foundry.data.CalendarConfig,
+    calendar: foundry.data.CalendarData,
     components: TimeComponents,
     options?: Intl.DateTimeFormatOptions,
 ): string {
     return timeImpl(calendar, components, prepareOptions(options));
 }
-
-export function intl(calendar: foundry.data.CalendarConfig, components: TimeComponents, options?: DateTimeFormatOptions): string {
-    const opts = prepareOptions(options);
-    return parts(calendar, components, opts);
-}
-
-export function system(calendar: foundry.data.CalendarConfig, components: TimeComponents, options?: object): string {
-    return `${game.i18n.format(CONFIG.PF2E.worldClock.Date, {
-        era: 'AR', // FIXME,
-        year: components.year,
-        month: separated(month(calendar, components, 'long')),
-        day: ordinalString(components.dayOfMonth + 1),
-        weekday: separated(weekday(calendar, components, 'long')),
-    })
-        } (${time(calendar, components, { timeStyle: 'full' })
-        })`;
-};

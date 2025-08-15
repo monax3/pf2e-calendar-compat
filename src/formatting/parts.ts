@@ -1,29 +1,28 @@
-import { ordinalString } from "../date";
-import type { DateTimeFormatOptions, TimeComponents, Part } from './_types';
+import { ordinalString } from '../date';
 
-export function numeric(
-    type: Part['type'],
-    value: number,
-    options: DateTimeFormatOptions['day' | 'hour' | 'minute'] | 'ordinal',
-): Part {
+import type { DateTimeFormatOptions, Part, TimeComponents } from './_types';
+
+export function era(
+    value: string,
+    options: DateTimeFormatOptions['era'],
+): string | undefined {
     switch (options) {
-        case 'ordinal':
-            return { type, text: ordinalString(value) };
-        case '2-digit':
-            return { type, text: (value % 100).paddedString(2) };
-        case 'numeric':
-            return { type, text: value.toString() };
+        case 'long':
+        case 'short':
+            return game.i18n.localize(value);
+        case 'narrow':
+            return game.i18n.localize(value).slice(0, 1);
         default:
-            return { type: 'blank' };
+            return undefined;
     }
 }
 
 export function month(
-    calendar: foundry.data.CalendarConfig,
+    calendar: foundry.data.CalendarData,
     components: TimeComponents,
     options: DateTimeFormatOptions['month'],
 ): Part {
-    const monthName = (index: number) =>
+    const monthName = (index: number): string =>
         game.i18n.localize(calendar.months?.values[index]?.name ?? 'INVALID');
 
     switch (options) {
@@ -42,28 +41,45 @@ export function month(
     }
 }
 
-export function era(
-    value: string,
-    options: DateTimeFormatOptions['era'],
-): string | undefined {
+export function numeric(
+    type: Part['type'],
+    value: number,
+    options: 'ordinal' | DateTimeFormatOptions['day' | 'hour' | 'minute'],
+): Part {
     switch (options) {
-        case 'long':
-        case 'short':
-            return value;
-        case 'narrow':
-            return value.slice(0, 1);
+        case 'ordinal':
+            return { type, text: ordinalString(value) };
+        case '2-digit':
+            return { type, text: (value % 100).paddedString(2) };
+        case 'numeric':
+            return { type, text: value.toString() };
         default:
-            return undefined;
+            return { type: 'blank' };
     }
 }
 
-function handlePreEraYears(year: number) {
+// FIXME
+function handlePreEraYears(year: number): number {
     return year > 0 ? year : year - 1;
+}
+
+export function amPm(calendar: foundry.data.CalendarData, components: TimeComponents, options: DateTimeFormatOptions): Part {
+    if (options.hour12) {
+        if (components.hour < 12) { return { type: 'hour12', text: 'AM' }; } else { return { type: 'hour12', text: 'PM' }; }
+    } else {
+        return { type: 'blank' };
+    }
+}
+
+export function blanked(type: Part['type'], text: string): Part {
+    return text.length > 0
+        ? { type, text }
+        : { type: 'blank' };
 }
 
 export function eraYear(
     eraName: string,
-    calendar: foundry.data.CalendarConfig,
+    calendar: foundry.data.CalendarData,
     components: TimeComponents,
     options: DateTimeFormatOptions,
 ): Part {
@@ -79,12 +95,59 @@ export function eraYear(
     }
 }
 
+export function getDateSeparator(options: DateTimeFormatOptions): string {
+    return options.month === 'long' ? ' ' : '/';
+}
+
+export function hour(
+    calendar: foundry.data.CalendarData,
+    components: TimeComponents,
+    options: DateTimeFormatOptions,
+): Part {
+    const hour12 = options.hour12
+        ? (value: number) => toHour12(value)
+        : (value: number) => value;
+
+    switch (options.hour) {
+        case '2-digit':
+            return { type: 'hour', text: (hour12(components.hour) % 100).paddedString(2) };
+        case 'numeric':
+            return { type: 'hour', text: hour12(components.hour).toString() };
+        default:
+            return { type: 'blank' };
+    }
+}
+
+export function separated(...parts: Part[]): string {
+    let sep: false | string | true = false;
+
+    return parts.flatMap((it) => {
+        switch (it.type) {
+            case 'blank':
+                if (sep !== false) { sep = true; }
+                return [];
+            case 'separator':
+                if (sep !== false) { sep = it.text; }
+                return [];
+            default: {
+                const value = typeof sep === 'string' ? [sep, it.text] : [it.text];
+                sep = true;
+                return value;
+            }
+        }
+    }).join('');
+}
+
+export function toHour12(value: number): number {
+    if (value === 0) { return 12; } else if (value > 12) { return value - 12; } else { return value; }
+}
+
 export function weekday(
-    calendar: foundry.data.CalendarConfig,
+    calendar: foundry.data.CalendarData,
     components: TimeComponents,
     options: DateTimeFormatOptions['weekday'],
 ): Part {
-    const weekdayName = (index: number) => game.i18n.localize(calendar.days.values[index]?.name ?? 'INVALID');
+    const weekdayName = (index: number): string => game.i18n.localize(calendar.days.values[index]?.name ?? 'INVALID');
 
     switch (options) {
         case 'long':
@@ -96,67 +159,4 @@ export function weekday(
         default:
             return { type: 'blank' };
     }
-}
-
-export function toHour12(hour: number): number {
-    if (hour === 0) { return 12; }
-    else if (hour > 12) { return hour - 12; }
-    else { return hour; }
-}
-
-export function hour(
-    calendar: foundry.data.CalendarConfig,
-    components: TimeComponents,
-    options: DateTimeFormatOptions,
-): Part {
-    const hour = options.hour12
-        ? (value: number) => toHour12(value)
-        : (value: number) => value;
-
-    switch (options.hour) {
-        case '2-digit':
-            return { type: 'hour', text: (hour(components.hour) % 100).paddedString(2) };
-        case 'numeric':
-            return { type: 'hour', text: hour(components.hour).toString() };
-        default:
-            return { type: 'blank' };
-    }
-}
-
-export function amPm(calendar: foundry.data.CalendarConfig, components: TimeComponents, options: DateTimeFormatOptions): Part {
-    if (options.hour12) {
-        if (components.hour < 12) { return { type: 'hour12', text: 'AM' } }
-        else { return { type: 'hour12', text: 'PM' }; }
-    } else {
-        return { type: 'blank' };
-    }
-}
-
-export function getDateSeparator(options: DateTimeFormatOptions): string {
-    return options.month === 'long' ? ' ' : '/';
-}
-
-export function separated(...parts: Part[]): string {
-    let sep: string | true | false = false;
-
-    return parts.flatMap(it => {
-        switch (it.type) {
-            case 'blank':
-                if (sep !== false) { sep = true };
-                return [];
-            case 'separator':
-                if (sep !== false) { sep = it.text };
-                return [];
-            default:
-                const value = typeof sep === 'string' ? [sep, it.text] : [it.text];
-                sep = true;
-                return value;
-        }
-    }).join('');
-}
-
-export function blanked(type: Part['type'], text: string): Part {
-    return text.length > 0
-        ? { type, text }
-        : { type: 'blank' }
 }

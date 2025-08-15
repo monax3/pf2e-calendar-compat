@@ -1,16 +1,18 @@
 import type { TimeComponents } from 'foundry-pf2e/foundry/client/data/_types.mjs';
-import { AbsalomReckoning } from './configs/configs';
+
+import { AbsalomReckoning } from './configs';
 import * as Formatters from './formatting/formatters';
+import { GregorianCalendar } from './gregorian-calendar';
 import { CalendarPF2e } from './pf2e-calendar';
 
 export interface Time {
-    earthCalendarConfig: foundry.data.CalendarConfig
-    earthCalendarClass: typeof foundry.data.CalendarData
+    earthCalendarClass: typeof foundry.data.CalendarData;
+    earthCalendarConfig: foundry.data.CalendarConfig;
 
-    worldCalendarConfig: foundry.data.CalendarConfig
-    worldCalendarClass: typeof foundry.data.CalendarData
+    worldCalendarClass: typeof foundry.data.CalendarData;
+    worldCalendarConfig: foundry.data.CalendarConfig;
 
-    formatters: Record<string, (calendar: foundry.data.CalendarConfig, components: TimeComponents, options?: Intl.DateTimeFormatOptions) => string>;
+    formatters: Record<string, (calendar: foundry.data.CalendarData, components: TimeComponents, options?: Intl.DateTimeFormatOptions) => string>;
 }
 
 Hooks.on('init', () => {
@@ -18,6 +20,7 @@ Hooks.on('init', () => {
 
     config.worldCalendarConfig = AbsalomReckoning as foundry.data.CalendarConfig;
     config.worldCalendarClass = CalendarPF2e as typeof foundry.data.CalendarData;
+    config.earthCalendarClass = GregorianCalendar as typeof foundry.data.CalendarData;
 
     for (const [name, func] of Object.entries(Formatters)) {
         config.formatters[name] = func;
@@ -27,8 +30,4 @@ Hooks.on('init', () => {
     CONFIG.compatibility.mode = CONST.COMPATIBILITY_MODES.SILENT;
 });
 
-import test from './quench';
-
-Hooks.on('quenchReady', (quench) => {
-    quench.registerBatch('pf2e-calendar-compat', test);
-})
+import './tests/quench';

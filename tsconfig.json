@@ -35,24 +35,18 @@
         "sourceMap": true,
         "target": "ES2022",
         "types": [
-            // "jquery",
-            // "node",
-            // "tooltipster",
-            // "fvtt-lib-wrapper",
-            // "three",
+            "node",
             "foundry-pf2e",
-            // "foundry-pf2e/foundry",
-            // "foundry-pf2e/lib-wrapper",
-            // "foundry-pf2e/dice-so-nice"
-            // "simple-calendar"
+            "@ethaks/fvtt-quench",
         ]
     },
     "include": [
         "./src/**/*.ts",
         // "./build/*.ts",
-        // "./*.mts"
+        "./*.mts",
         // "**/*.ts",
         // "**/*.mts"
+        "./pf2e-test-mock/**/*.ts",
     ],
     "exclude": [
         // "./foundry-src/**/*",

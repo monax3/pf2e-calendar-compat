@@ -1,11 +1,11 @@
-import type { TimeComponents } from "foundry-pf2e/foundry/client/data/_types.mjs";
+import type { TimeComponents } from 'foundry-pf2e/foundry/client/data/_types.mjs';
+
+export type Formatter<TOptions extends object = object, TComponents extends TimeComponents = TimeComponents> = (calendar: foundry.data.CalendarData<TComponents>, components: TComponents, options?: TOptions) => string;
+
+export type Part = { text: string; type: 'separator' | keyof DateTimeFormatOptions } | { type: 'blank' };
 
 export interface DateTimeFormatOptions extends Omit<Intl.DateTimeFormatOptions, 'day'> {
-    day?: Intl.DateTimeFormatOptions['day'] | 'ordinal'
+    day?: 'ordinal' | Intl.DateTimeFormatOptions['day'];
 }
-
-export type Formatter<TOptions extends object = object> = (calendar: foundry.data.CalendarConfig, components: TimeComponents, options?: TOptions) => string;
-
-export type Part = { type: 'separator' | keyof DateTimeFormatOptions, text: string; } | { type: 'blank' };
 
 export type { TimeComponents };
