@@ -1,0 +1,25 @@
+{
+    "id": "pf2e-calendar-compat",
+    "title": "PF2e Calendar API Support",
+    "version": "1.0",
+    "authors": [
+        {
+            "name": "Mona",
+            "email": "mona@gol.bz",
+            "flags": {}
+        }
+    ],
+    "compatibility": {
+        "minimum": "13",
+        "verified": "13"
+    },
+    "esmodules": ["pf2e-calendar-compat.mjs"],
+    "relationships": {
+        "systems": [
+            {
+                "id": "pf2e",
+                "type": "system"
+            }
+        ]
+    }
+}
