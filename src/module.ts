@@ -1,6 +1,7 @@
 import type { TimeComponents } from 'foundry-pf2e/foundry/client/data/_types.mjs';
-import * as AR from './absalom-reckoning';
+import { AbsalomReckoning } from './configs/configs';
 import * as Formatters from './formatting/formatters';
+import { CalendarPF2e } from './pf2e-calendar';
 
 export interface Time {
     earthCalendarConfig: foundry.data.CalendarConfig
@@ -15,8 +16,8 @@ export interface Time {
 Hooks.on('init', () => {
     const config = CONFIG.time as unknown as Time;
 
-    config.worldCalendarConfig = AR.CalendarConfig as foundry.data.CalendarConfig;
-    config.worldCalendarClass = AR.Calendar as typeof foundry.data.CalendarData;
+    config.worldCalendarConfig = AbsalomReckoning as foundry.data.CalendarConfig;
+    config.worldCalendarClass = CalendarPF2e as typeof foundry.data.CalendarData;
 
     for (const [name, func] of Object.entries(Formatters)) {
         config.formatters[name] = func;
@@ -25,3 +26,9 @@ Hooks.on('init', () => {
     // FIXME
     CONFIG.compatibility.mode = CONST.COMPATIBILITY_MODES.SILENT;
 });
+
+import test from './quench';
+
+Hooks.on('quenchReady', (quench) => {
+    quench.registerBatch('pf2e-calendar-compat', test);
+})

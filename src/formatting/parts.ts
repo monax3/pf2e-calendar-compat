@@ -57,13 +57,17 @@ export function era(
     }
 }
 
+function handlePreEraYears(year: number) {
+    return year > 0 ? year : year - 1;
+}
+
 export function eraYear(
     eraName: string,
     calendar: foundry.data.CalendarConfig,
     components: TimeComponents,
     options: DateTimeFormatOptions,
 ): Part {
-    const year = numeric('year', components.year, options.year);
+    const year = numeric('year', handlePreEraYears(components.year), options.year);
     const eraValue = era(eraName, options.era);
 
     if (eraValue != null && year.type !== 'blank') {

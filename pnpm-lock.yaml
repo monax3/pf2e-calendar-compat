@@ -26,6 +26,9 @@ importers:
       foundry-pf2e:
         specifier: github:7H3LaughingMan/foundry-pf2e
         version: https://codeload.github.com/7H3LaughingMan/foundry-pf2e/tar.gz/68aca8b6d64707172b920e8d7fb8ae8d41a83240(@pixi/assets@7.4.3(@pixi/core@7.4.3))(@pixi/compressed-textures@7.4.3(@pixi/assets@7.4.3(@pixi/core@7.4.3))(@pixi/core@7.4.3))(@pixi/constants@7.4.3)(@pixi/core@7.4.3)(@pixi/display@7.4.3(@pixi/core@7.4.3))(@pixi/graphics@7.4.3(@pixi/core@7.4.3)(@pixi/display@7.4.3(@pixi/core@7.4.3))(@pixi/sprite@7.4.3(@pixi/core@7.4.3)(@pixi/display@7.4.3(@pixi/core@7.4.3))))(@pixi/math@7.4.3)(@pixi/sprite@7.4.3(@pixi/core@7.4.3)(@pixi/display@7.4.3(@pixi/core@7.4.3)))(@pixi/ticker@7.4.3)
+      remeda:
+        specifier: ^2.27.0
+        version: 2.27.0
       tsx:
         specifier: ^4.20.3
         version: 4.20.3
@@ -1099,6 +1102,9 @@ packages:
 
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
+
+  remeda@2.27.0:
+    resolution: {integrity: sha512-KWG2qPzprmCGUoWSUSEJPLhczFRXlxh5YJTvQWZoN4hw5EG+nVase5lCVwEsidA7jDV2K5nibr9jpK4eNaOMdw==}
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
@@ -2477,6 +2483,10 @@ snapshots:
       side-channel: 1.1.0
 
   react-is@18.3.1: {}
+
+  remeda@2.27.0:
+    dependencies:
+      type-fest: 4.41.0
 
   require-directory@2.1.1: {}
 
