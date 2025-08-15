@@ -1,8 +1,8 @@
 import type { TimeComponents } from 'foundry-pf2e/foundry/client/data/_types.mjs';
 import * as AR from './absalom-reckoning';
-import { formatDate, formatIntl, formatSystem, formatTime } from './format';
+import * as Formatters from './formatting/formatters';
 
-interface Time {
+export interface Time {
     earthCalendarConfig: foundry.data.CalendarConfig
     earthCalendarClass: typeof foundry.data.CalendarData
 
@@ -17,8 +17,11 @@ Hooks.on('init', () => {
 
     config.worldCalendarConfig = AR.CalendarConfig as foundry.data.CalendarConfig;
     config.worldCalendarClass = AR.Calendar as typeof foundry.data.CalendarData;
-    config.formatters['intl'] = formatIntl;
-    config.formatters['time'] = formatTime;
-    config.formatters['date'] = formatDate;
-    config.formatters['system'] = formatSystem;
+
+    for (const [name, func] of Object.entries(Formatters)) {
+        config.formatters[name] = func;
+    }
+
+    // FIXME
+    CONFIG.compatibility.mode = CONST.COMPATIBILITY_MODES.SILENT;
 });

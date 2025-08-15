@@ -1,6 +1,7 @@
 import type { TimeComponents } from "foundry-pf2e/foundry/client/data/_types.mjs";
-import { formatIntl, formatTime, formatDate } from './format';
 import { getDayOfWeek, getDayOfYear } from "./date";
+import * as Formatters from "./formatting/formatters";
+import type { Formatter } from "./formatting/_types";
 
 export const CalendarConfig = {
     name: "Absalom Reckoning",
@@ -55,7 +56,7 @@ export const CalendarConfig = {
 };
 
 export class Calendar extends foundry.data.CalendarData {
-    override timeToComponents(seconds: number = 0): TimeComponents {
+    override timeToComponents(seconds = 0): TimeComponents {
         const date = this.#timeToDate(seconds);
 
         const day = getDayOfYear(date);
@@ -123,27 +124,23 @@ export class Calendar extends foundry.data.CalendarData {
 
         const date = this.#now();
 
-        if (year != undefined) date.setUTCFullYear(year - 2700);
+        if (year != undefined) { date.setUTCFullYear(year - 2700); }
 
         if (dayOfMonth != undefined && month != undefined) {
-            date.setUTCMonth(month);
-            date.setUTCDate(dayOfMonth + 1);
-        } else {
-            date.setUTCMonth(0);
-            date.setUTCDate(1);
-            if (day) {
-                date.setUTCDate(day + 1);
-            }
+            date.setUTCFullYear(date.getUTCFullYear(), month, dayOfMonth + 1);
+
+        } else if (day != undefined) {
+            date.setUTCFullYear(date.getUTCFullYear(), 0, 1);
+            date.setUTCDate(day + 1);
         }
 
-        if (hour != undefined) date.setUTCHours(hour);
-        if (minute != undefined) date.setUTCMinutes(minute);
-        if (second != undefined) date.setUTCSeconds(second);
+        if (hour != undefined) { date.setUTCHours(hour); }
+        if (minute != undefined) { date.setUTCMinutes(minute); }
+        if (second != undefined) { date.setUTCSeconds(second); }
 
         return date;
     }
 
-    static intl = formatIntl;
-    static time = formatTime;
-    static date = formatDate;
+    static system: Formatter = Formatters.system;
+    static intl: Formatter = Formatters.intl;
 }
