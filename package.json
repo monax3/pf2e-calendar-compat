@@ -6,14 +6,17 @@
 	"sideEFfects": false,
 	"packageManager": "pnpm@10.13.1+sha512.37ebf1a5c7a30d5fabe0c5df44ee8da4c965ca0c5af3dbab28c3a1681b70a256218d05c81c9c0dcf767ef6b8551eb5b960042b9ed4300c59242336377e01cfad",
 	"scripts": {
-		"build": "esbuild src/module.ts --bundle --minify-whitespace --minify-syntax --format=esm --sourcemap --outfile=dist/pf2e-calendar-compat.mjs --keep-names --analyze"
+		"build": "esbuild src/module.ts --bundle --minify-whitespace --minify-syntax --format=esm --sourcemap --outfile=dist/pf2e-calendar-compat.mjs --keep-names --analyze",
+		"test": "tsx --test --test-reporter=@voxpelli/node-test-pretty-reporter src/absalom-reckoning.test.ts"
 	},
 	"devDependencies": {
 		"@types/node": "^24.1.0",
+		"@voxpelli/node-test-pretty-reporter": "^1.1.2",
 		"browserslist": "^4.25.1",
 		"esbuild": "^0.25.8",
 		"esbuild-plugin-browserslist": "^1.0.1",
 		"foundry-pf2e": "github:7H3LaughingMan/foundry-pf2e",
+		"tsx": "^4.20.3",
 		"typescript": "^5.8.3"
 	}
 }

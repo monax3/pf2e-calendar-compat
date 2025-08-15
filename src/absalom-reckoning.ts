@@ -141,6 +141,6 @@ export class Calendar extends foundry.data.CalendarData {
         return date;
     }
 
-    static system: Formatter = Formatters.system;
-    static intl: Formatter = Formatters.intl;
+    // static system: Formatter = Formatters.system;
+    // static intl: Formatter = Formatters.intl;
 }

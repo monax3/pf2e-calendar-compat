@@ -8,6 +8,7 @@ import {
     eraYear,
     separated,
     amPm,
+    blanked
 } from './parts';
 import { ordinalString } from '../date';
 import { prepareOptions } from './options';
@@ -21,7 +22,7 @@ function dateImpl(
 ): string {
     const separator = getDateSeparator(options);
 
-    const ret = separated(
+    return separated(
         weekday(calendar, components, options.weekday),
         { type: 'separator', text: ', ' },
         month(calendar, components, options.month),
@@ -30,8 +31,6 @@ function dateImpl(
         { type: 'separator', text: options.month === 'long' ? ', ' : separator },
         eraYear('AR', calendar, components, options),
     );
-
-    return ret;
 }
 
 function timeImpl(
@@ -69,10 +68,12 @@ function parts(
 ): string {
     const sep = dateTimeSep(options);
 
+    console.warn(options);
+
     return separated(
-        { type: 'dateStyle', text: dateImpl(calendar, components, options) },
+        blanked('dateStyle', dateImpl(calendar, components, options)),
         { type: 'separator', text: sep },
-        { type: 'timeStyle', text: timeImpl(calendar, components, options) },
+        blanked('timeStyle', timeImpl(calendar, components, options)),
     );
 }
 
@@ -81,8 +82,7 @@ export function date(
     components: TimeComponents,
     options?: Intl.DateTimeFormatOptions,
 ): string {
-    const opts = prepareOptions(options);
-    return dateImpl(calendar, components, opts);
+    return dateImpl(calendar, components, prepareOptions(options));
 }
 
 export function time(
@@ -90,8 +90,7 @@ export function time(
     components: TimeComponents,
     options?: Intl.DateTimeFormatOptions,
 ): string {
-    const opts = prepareOptions(options);
-    return timeImpl(calendar, components, opts);
+    return timeImpl(calendar, components, prepareOptions(options));
 }
 
 export function intl(calendar: foundry.data.CalendarConfig, components: TimeComponents, options?: DateTimeFormatOptions): string {

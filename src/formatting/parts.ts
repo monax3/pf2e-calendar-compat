@@ -13,7 +13,7 @@ export function numeric(
             return { type, text: (value % 100).paddedString(2) };
         case 'numeric':
             return { type, text: value.toString() };
-        case undefined:
+        default:
             return { type: 'blank' };
     }
 }
@@ -37,7 +37,7 @@ export function month(
             return { type: 'month', text: monthName(components.month).slice(0, 3) };
         case 'narrow':
             return { type: 'month', text: monthName(components.month).slice(0, 1) };
-        case undefined:
+        default:
             return { type: 'blank' };
     }
 }
@@ -52,7 +52,7 @@ export function era(
             return value;
         case 'narrow':
             return value.slice(0, 1);
-        case undefined:
+        default:
             return undefined;
     }
 }
@@ -89,7 +89,7 @@ export function weekday(
             return { type: 'weekday', text: weekdayName(components.dayOfWeek).slice(0, 4) };
         case 'narrow':
             return { type: 'weekday', text: weekdayName(components.dayOfWeek).slice(0, 1) };
-        case undefined:
+        default:
             return { type: 'blank' };
     }
 }
@@ -114,7 +114,7 @@ export function hour(
             return { type: 'hour', text: (hour(components.hour) % 100).paddedString(2) };
         case 'numeric':
             return { type: 'hour', text: hour(components.hour).toString() };
-        case undefined:
+        default:
             return { type: 'blank' };
     }
 }
@@ -149,4 +149,10 @@ export function separated(...parts: Part[]): string {
                 return value;
         }
     }).join('');
+}
+
+export function blanked(type: Part['type'], text: string): Part {
+    return text.length > 0
+        ? { type, text }
+        : { type: 'blank' }
 }
