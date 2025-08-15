@@ -1,6 +1,12 @@
-import type { TimeComponents } from "foundry-pf2e/foundry/client/data/_types.mjs";
-import type { Formatter } from "../src/formatting/_types";
-import type { DataModelConstructionContext, DataModelUpdateOptions, DataModelValidationOptions } from "foundry-pf2e/foundry/common/abstract/_types.mjs";
+import type { DataModelConstructionContext, DataModelUpdateOptions, DataModelValidationOptions } from 'pf2e-types/foundry/abstract/types';
+import type { CalendarData, CalendarDataSchema } from 'pf2e-types/foundry/data';
+import type {
+    ArrayField, ModelPropsFromSchema, NumberField, SchemaField, SourceFromSchema, StringField,
+} from 'pf2e-types/foundry/data/fields';
+import type { CalendarConfig, TimeComponents } from 'pf2e-types/foundry/data/types';
+import type { DataModelValidationFailure } from 'pf2e-types/foundry/data/validation';
+
+import type { Formatter } from '../src/formatting/_types';
 
 export const SIMPLIFIED_GREGORIAN_CALENDAR_CONFIG = {
     name: 'Simplified Gregorian',
@@ -55,27 +61,25 @@ export const SIMPLIFIED_GREGORIAN_CALENDAR_CONFIG = {
     },
 };
 
-export abstract class CalendarData implements foundry.data.CalendarConfig {
-    get mock(): foundry.data.CalendarData {
-        return this as unknown as foundry.data.CalendarData;
-    }
+export abstract class MockCalendarData implements CalendarConfig {
 
     constructor() {
         Object.assign(this, SIMPLIFIED_GREGORIAN_CALENDAR_CONFIG);
     }
 
-    abstract days: foundry.data.fields.ModelPropsFromSchema<
+    abstract _source: SourceFromSchema<CalendarDataSchema>;
+    abstract days: ModelPropsFromSchema<
         {
-            daysPerYear: foundry.data.fields.NumberField<number, number, true, false, false>;
-            hoursPerDay: foundry.data.fields.NumberField<number, number, true, false, false>;
-            minutesPerHour: foundry.data.fields.NumberField<number, number, true, false, false>;
-            secondsPerMinute: foundry.data.fields.NumberField<number, number, true, false, false>;
-            values: foundry.data.fields.ArrayField<
-                foundry.data.fields.SchemaField<
+            daysPerYear: NumberField<number, number, true, false, false>;
+            hoursPerDay: NumberField<number, number, true, false, false>;
+            minutesPerHour: NumberField<number, number, true, false, false>;
+            secondsPerMinute: NumberField<number, number, true, false, false>;
+            values: ArrayField<
+                SchemaField<
                     {
-                        abbreviation: foundry.data.fields.StringField;
-                        name: foundry.data.fields.StringField<string, string, true, false, false>;
-                        ordinal: foundry.data.fields.NumberField<
+                        abbreviation: StringField;
+                        name: StringField<string, string, true, false, false>;
+                        ordinal: NumberField<
                             number,
                             number,
                             true,
@@ -88,16 +92,17 @@ export abstract class CalendarData implements foundry.data.CalendarConfig {
         }
     >;
     abstract months: null | {
-        values: foundry.data.fields.ModelPropsFromSchema<
+        values: ModelPropsFromSchema<
             {
-                abbreviation: foundry.data.fields.StringField;
-                days: foundry.data.fields.NumberField<number, number, true, false, false>;
-                leapDays: foundry.data.fields.NumberField;
-                name: foundry.data.fields.StringField<string, string, true, false, false>;
-                ordinal: foundry.data.fields.NumberField<number, number, true, false, false>;
+                abbreviation: StringField;
+                days: NumberField<number, number, true, false, false>;
+                leapDays: NumberField;
+                name: StringField<string, string, true, false, false>;
+                ordinal: NumberField<number, number, true, false, false>;
             }
         >[];
     };
+    abstract parent: null;
     abstract seasons: null | {
         values: {
             abbreviation: string | undefined;
@@ -108,31 +113,45 @@ export abstract class CalendarData implements foundry.data.CalendarConfig {
             name: string;
         }[];
     };
-    abstract years: foundry.data.fields.ModelPropsFromSchema<
+    abstract years: ModelPropsFromSchema<
         {
-            firstWeekday: foundry.data.fields.NumberField<number, number, true, false, true>;
-            leapYear: foundry.data.fields.SchemaField<
+            firstWeekday: NumberField<number, number, true, false, true>;
+            leapYear: SchemaField<
                 {
-                    leapInterval: foundry.data.fields.NumberField<
+                    leapInterval: NumberField<
                         number,
                         number,
                         true,
                         false,
                         true
                     >;
-                    leapStart: foundry.data.fields.NumberField<number, number, true, false, true>;
+                    leapStart: NumberField<number, number, true, false, true>;
                 }
             >;
-            yearZero: foundry.data.fields.NumberField<number, number, true, false, true>;
+            yearZero: NumberField<number, number, true, false, true>;
         }
     >;
+    protected abstract _configure(): void;
+    abstract add(startTime: number | TimeComponents, deltaTime: number | TimeComponents): TimeComponents;
+    abstract componentsToTime(components: TimeComponents): number;
+    abstract difference(endTime: number | TimeComponents, startTime: number | TimeComponents): TimeComponents;
+    abstract isLeapYear(year: number): boolean;
     abstract timeToComponents(time: number): TimeComponents;
+    abstract timeToComponents(seconds?: number): TimeComponents;
 
     abstract name: string;
     abstract description: string;
-    get config(): foundry.data.CalendarConfig {
+    protected static _schema: undefined;
+    get config(): CalendarConfig {
         return this;
     }
+    get mock(): CalendarData {
+        return this as unknown as CalendarData;
+    }
+    static get schema(): SchemaField<CalendarDataSchema> {
+        return null as any;
+    }
+
     format(
         time: number | TimeComponents,
         formatter: Formatter | string = 'timestamp',
@@ -142,7 +161,7 @@ export abstract class CalendarData implements foundry.data.CalendarConfig {
             ? this.timeToComponents(time)
             : time;
         if (typeof formatter === 'string') {
-            const formatterFn = (CONFIG.time as any).formatters[formatter]
+            const formatterFn = CONFIG.time.formatters[formatter]
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
                 ?? this.constructor[formatter as keyof Function] as
                 | Formatter
@@ -158,49 +177,34 @@ export abstract class CalendarData implements foundry.data.CalendarConfig {
         return formatter(this.mock, components, options);
     }
 
-    abstract componentsToTime(components: TimeComponents): number;
-    abstract timeToComponents(seconds?: number): TimeComponents;
-    abstract isLeapYear(year: number): boolean;
-    abstract add(startTime: number | TimeComponents, deltaTime: number | TimeComponents): TimeComponents;
-    abstract difference(endTime: number | TimeComponents, startTime: number | TimeComponents): TimeComponents;
+    /** Define the data schema for this document instance. */
+    // PROJECT NOTE: this must be overloaded in an interface merge declaration
+    get schema(): SchemaField<CalendarDataSchema> {
+        return null as any;
+    }
 
-    abstract _source: foundry.data.fields.SourceFromSchema<foundry.data.CalendarDataSchema>;
-    abstract parent: null;
-    protected static _schema: undefined;
-    protected abstract _configure(): void;
+    /** Is the current state of this DataModel invalid? */
+    get invalid(): boolean {
+        return false;
+    }
 
-        static get schema(): foundry.data.fields.SchemaField<foundry.data.CalendarDataSchema> {
-            return null as any;
-        }
-    
-        /** Define the data schema for this document instance. */
-        // PROJECT NOTE: this must be overloaded in an interface merge declaration
-        get schema(): foundry.data.fields.SchemaField<foundry.data.CalendarDataSchema> {
-            return null as any;
-        }
-    
-        /** Is the current state of this DataModel invalid? */
-        get invalid(): boolean {
-            return false;
-        }
-    
-        /** An array of validation failure instances which may have occurred when this instance was last validated. */
-        get validationFailures(): {
-            fields: foundry.data.validation.DataModelValidationFailure | null;
-            joint: foundry.data.validation.DataModelValidationFailure | null;
-        } {
-            return { fields: null, joint: null };
-        }
-
-        protected abstract _initializeSource(data: object, options?: DataModelConstructionContext<null>): this["_source"];
+    /** An array of validation failure instances which may have occurred when this instance was last validated. */
     protected abstract _initialize(options?: Record<string, unknown>): void;
+    protected abstract _initializeSource(data: object, options?: DataModelConstructionContext<null>): this['_source'];
+
+    get validationFailures(): {
+        fields: DataModelValidationFailure | null;
+        joint: DataModelValidationFailure | null;
+    } {
+        return { fields: null, joint: null };
+    }
 
     /** Reset the state of this data instance back to mirror the contained source data, erasing any changes. */
-    abstract reset(): void;
     abstract clone(data?: Record<string, unknown>, context?: DataModelConstructionContext<null>): this;
-        abstract validate(options?: DataModelValidationOptions): boolean;
-        abstract updateSource(changes?: Record<string, unknown>, options?: DataModelUpdateOptions): DeepPartial<this["_source"]>;
-        abstract toObject(source?: boolean): this["_source"];
-    abstract toJSON(): this["_source"];
+    abstract reset(): void;
+    abstract toJSON(): this['_source'];
+    abstract toObject(source?: boolean): this['_source'];
+    abstract updateSource(changes?: Record<string, unknown>, options?: DataModelUpdateOptions): DeepPartial<this['_source']>;
+    abstract validate(options?: DataModelValidationOptions): boolean;
 
 }

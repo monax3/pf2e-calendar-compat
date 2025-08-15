@@ -3,8 +3,12 @@
 	"type": "module",
 	"private": true,
 	"browser": "src/module.ts",
+	"exports": {
+		".": "./types/index.d.ts",
+		"./*": "./src/*"
+	},
 	"sideEFfects": false,
-	"packageManager": "pnpm@10.13.1+sha512.37ebf1a5c7a30d5fabe0c5df44ee8da4c965ca0c5af3dbab28c3a1681b70a256218d05c81c9c0dcf767ef6b8551eb5b960042b9ed4300c59242336377e01cfad",
+	"packageManager": "pnpm@10.14.0+sha512.ad27a79641b49c3e481a16a805baa71817a04bbe06a38d17e60e2eaee83f6a146c6a688125f5792e48dd5ba30e7da52a5cda4c3992b9ccf333f9ce223af84748",
 	"scripts": {
 		"build": "esbuild src/module.ts --bundle --minify-whitespace --minify-syntax --format=esm --sourcemap --outfile=dist/pf2e-calendar-compat.mjs --keep-names --analyze",
 		"build:prod": "esbuild src/module.ts --define:process.env.NODE_ENV=\\\"production\\\" --bundle --minify-whitespace --minify-syntax --format=esm --sourcemap --outfile=dist/pf2e-calendar-compat.mjs --keep-names --analyze",
@@ -13,9 +17,8 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.32.0",
-		"@ethaks/fvtt-quench": "^0.10.0",
 		"@stylistic/eslint-plugin": "^5.2.2",
-		"@types/node": "^24.1.0",
+		"@types/node": "^24.2.1",
 		"@typescript-eslint/parser": "^8.38.0",
 		"@voxpelli/node-test-pretty-reporter": "^1.1.2",
 		"browserslist": "^4.25.1",
@@ -25,17 +28,13 @@
 		"eslint-plugin-perfectionist": "^4.15.0",
 		"eslint-plugin-tsdoc": "^0.4.0",
 		"eslint-plugin-unicorn": "^60.0.0",
-		"foundry-pf2e": "link:..\\forks\\foundry-pf2e",
 		"globals": "^16.3.0",
+		"handlebars": "^4.7.8",
 		"jiti": "^2.5.1",
+		"pf2e-types": "github:monax3/pf2e-types",
 		"remeda": "^2.27.0",
 		"tsx": "^4.20.3",
 		"typescript": "^5.8.3",
 		"typescript-eslint": "^8.38.0"
-	},
-	"pnpm": {
-		"overrides": {
-			"foundry-pf2e": "../forks/foundry-pf2e"
-		}
 	}
 }

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
+
 import type { TestContext } from './_types';
 
 function named(group: string, describe: string): string {

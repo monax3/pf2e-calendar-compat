@@ -1,7 +1,9 @@
-export default foundry.utils.mergeObject(
+import type { CalendarConfigPF2e } from '../pf2e-calendar';
+
+export const AbsalomReckoning: CalendarConfigPF2e = foundry.utils.mergeObject(
     foundry.utils.deepClone(foundry.data.SIMPLIFIED_GREGORIAN_CALENDAR_CONFIG),
     {
-        name: 'PF2E.WorldClock.DateTheme.AR',
+        name: 'PF2E.SETTINGS.WorldClock.DateThemes.AR',
         description: "Absalom Reckoning takes its origin from the moment the god Aroden lifted the Starstone from the depths of the Inner Sea and founded the city of Absalom, an event dated to 1 Abadius, 1 AR. This event also ushered in the Age of Enthronement in which human nations began to be founded in the Inner Sea region inspired by Aroden's example.",
         days: {
             values: [
@@ -34,3 +36,5 @@ export default foundry.utils.mergeObject(
         },
     },
 );
+
+export default AbsalomReckoning;

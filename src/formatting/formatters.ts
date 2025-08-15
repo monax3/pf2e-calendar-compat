@@ -1,4 +1,5 @@
-import type { TimeComponents } from 'foundry-pf2e/foundry/client/data/_types.mjs';
+import type { CalendarData } from 'pf2e-types/foundry/data';
+import type { TimeComponents } from 'pf2e-types/foundry/data/types';
 
 import { ordinalString } from '../date';
 import { CalendarPF2e } from '../pf2e-calendar';
@@ -18,7 +19,7 @@ import {
 } from './parts';
 
 function dateImpl(
-    calendar: foundry.data.CalendarData,
+    calendar: CalendarData,
     components: TimeComponents,
     options: DateTimeFormatOptions,
 ): string {
@@ -50,7 +51,7 @@ function dateTimeSep(options: DateTimeFormatOptions): string {
 }
 
 function parts(
-    calendar: foundry.data.CalendarData,
+    calendar: CalendarData,
     components: TimeComponents,
     options: DateTimeFormatOptions,
 ): string {
@@ -64,7 +65,7 @@ function parts(
 }
 
 function timeImpl(
-    calendar: foundry.data.CalendarData,
+    calendar: CalendarData,
     components: TimeComponents,
     options: DateTimeFormatOptions,
 ): string {
@@ -80,19 +81,19 @@ function timeImpl(
 }
 
 export function date(
-    calendar: foundry.data.CalendarData,
+    calendar: CalendarData,
     components: TimeComponents,
     options?: Intl.DateTimeFormatOptions,
 ): string {
     return dateImpl(calendar, components, prepareOptions(options));
 }
 
-export function intl(calendar: foundry.data.CalendarData, components: TimeComponents, options?: DateTimeFormatOptions): string {
+export function intl(calendar: CalendarData, components: TimeComponents, options?: DateTimeFormatOptions): string {
     const opts = prepareOptions(options);
     return parts(calendar, components, opts);
 }
 
-export function system(calendar: foundry.data.CalendarData, components: TimeComponents, options?: object): string {
+export function system(calendar: CalendarData, components: TimeComponents, options?: object): string {
     return `${game.i18n.format(CONFIG.PF2E.worldClock.Date, {
         day: ordinalString(components.dayOfMonth + 1),
         era: calendar instanceof CalendarPF2e ? calendar.eraName : '',
@@ -105,7 +106,7 @@ export function system(calendar: foundry.data.CalendarData, components: TimeComp
 }
 
 export function time(
-    calendar: foundry.data.CalendarData,
+    calendar: CalendarData,
     components: TimeComponents,
     options?: Intl.DateTimeFormatOptions,
 ): string {

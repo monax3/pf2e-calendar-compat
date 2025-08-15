@@ -1,4 +1,6 @@
-import type { TimeComponents } from 'foundry-pf2e/foundry/client/data/_types.mjs';
+/* eslint-disable @typescript-eslint/no-floating-promises */
+
+import type { TimeComponents } from 'pf2e-types/foundry/data/types';
 
 import type { GregorianCalendar } from '../gregorian-calendar';
 
@@ -84,10 +86,8 @@ export default function testGregorianCalendar({ assert, describe, it }: TestCont
                 [11, 3],
             ] as const
         ) {
-            const monthName = foundry.data.SIMPLIFIED_GREGORIAN_CALENDAR_CONFIG.months!.values[month]!.name
-                .split('.').at(-1);
-            const seasonName = foundry.data.SIMPLIFIED_GREGORIAN_CALENDAR_CONFIG.seasons!.values[season]!
-                .name.split('.').at(-1);
+            const monthName = foundry.data.SIMPLIFIED_GREGORIAN_CALENDAR_CONFIG.months!.values[month]?.name.split('.').at(-1);
+            const seasonName = foundry.data.SIMPLIFIED_GREGORIAN_CALENDAR_CONFIG.seasons!.values[season]?.name.split('.').at(-1);
 
             it(`${monthName} is in ${seasonName}`, function () {
                 const { earthCalendar } = game.time;

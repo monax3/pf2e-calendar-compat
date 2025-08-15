@@ -1,25 +1,23 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable unicorn/no-array-reduce, @typescript-eslint/no-unsafe-return */
 
 import assert from 'node:assert';
-import { before, describe, it } from 'node:test';
+import { describe, it } from 'node:test';
 
-import type { GamePF2e } from 'foundry-pf2e';
+import type { GamePF2e } from 'pf2e-types';
+import EN from 'pf2e-types/en.json' with { type: 'json' };
+import type { CalendarData } from 'pf2e-types/foundry/data';
 import type {
     ArrayField,
     ModelPropsFromSchema,
     NumberField,
     SchemaField,
     StringField,
-} from 'foundry-pf2e/foundry/common/data/fields.mjs';
+} from 'pf2e-types/foundry/data/fields';
+import type { CalendarConfig, TimeComponents } from 'pf2e-types/foundry/data/types';
 import { clone, mergeDeep } from 'remeda';
 
-// import EN from '../../../foundry-pf2e/en.json' with { type: 'json' };
-import EN from '../../forks/pf2e/static/lang/en.json' with { type: 'json' };
-
-import type { Formatter, TimeComponents } from './formatting/_types';
+import type { Formatter } from './formatting/_types';
 
 const worldClock = mergeDeep({
     AD: { yearOffset: -95 },
@@ -113,7 +111,7 @@ const SIMPLIFIED_GREGORIAN_CALENDAR_CONFIG = {
     },
 };
 
-abstract class CalendarData implements foundry.data.CalendarConfig {
+abstract class MockCalendarData implements CalendarConfig {
 
     constructor() {
         Object.assign(this, SIMPLIFIED_GREGORIAN_CALENDAR_CONFIG);
@@ -185,7 +183,7 @@ abstract class CalendarData implements foundry.data.CalendarConfig {
 
     abstract name: string;
     abstract description: string;
-    get config(): foundry.data.CalendarConfig {
+    get config(): CalendarConfig {
         return this;
     }
     format(
@@ -197,7 +195,7 @@ abstract class CalendarData implements foundry.data.CalendarConfig {
             ? this.timeToComponents(time)
             : time;
         if (typeof formatter === 'string') {
-            const formatterFn = (CONFIG.time as any).formatters[formatter]
+            const formatterFn = CONFIG.time.formatters[formatter]
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
                 ?? this.constructor[formatter as keyof Function] as
                 | Formatter
@@ -208,9 +206,9 @@ abstract class CalendarData implements foundry.data.CalendarConfig {
           function in CONFIG.time.formatters or as a named static function in the CalendarData class.`,
                 );
             }
-            return formatterFn(this as unknown as foundry.data.CalendarData, components, options);
+            return formatterFn(this as unknown as CalendarData, components, options);
         }
-        return formatter(this as unknown as foundry.data.CalendarData, components, options);
+        return formatter(this as unknown as CalendarData, components, options);
     }
 
 }
@@ -227,7 +225,7 @@ globalThis.CONFIG = {
 globalThis.game = mockGame() as unknown as GamePF2e;
 globalThis.foundry = {
     data: {
-        CalendarData,
+        CalendarData: MockCalendarData,
         SIMPLIFIED_GREGORIAN_CALENDAR_CONFIG,
     },
     utils: {
@@ -246,7 +244,7 @@ CONFIG.time = { formatters: Formatters } as any;
 
 globalThis.game.time = new class {
 
-    calendar = new CalendarPF2e(AbsalomReckoning as foundry.data.CalendarConfig);
+    calendar = new CalendarPF2e(AbsalomReckoning as CalendarConfig);
     earthCalendar = new GregorianCalendar(foundry.data.SIMPLIFIED_GREGORIAN_CALENDAR_CONFIG);
     worldTime = 26_387_388;
 
@@ -283,6 +281,7 @@ Object.defineProperty(String.prototype, 'capitalize', {
 
 import AR from './tests/absalom-reckoning';
 AR({ assert, describe, it });
+
 import GC from './tests/gregorian-calendar';
 GC({ assert, describe, it });
 

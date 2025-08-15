@@ -1,6 +1,7 @@
-import type { TimeComponents } from 'foundry-pf2e/foundry/client/data/_types.mjs';
+import type { TimeComponents } from 'pf2e-types/foundry/data/types';
 
 import { getDayOfWeek, getDayOfYear } from './date';
+import { ImprovedCalendar } from './improved-calendar';
 
 const DEFAULT_COMPONENTS: TimeComponents = {
     day: 0,
@@ -15,31 +16,7 @@ const DEFAULT_COMPONENTS: TimeComponents = {
     year: 0,
 };
 
-interface SeasonByDay extends foundry.data.CalendarConfigSeason {
-    dayEnd: number;
-    dayStart: number;
-}
-
-interface SeasonByMonth extends foundry.data.CalendarConfigSeason {
-    monthEnd: number;
-    monthStart: number;
-}
-
-function isSeasonsByDay(values: foundry.data.CalendarConfigSeason[]): values is SeasonByDay[] {
-    // Only check first season, if you're mixing by-month and by-day
-    // you should be expecting errors
-    const first = values[0];
-    return typeof first?.dayStart === 'number'
-        && typeof first.dayEnd === 'number';
-}
-
-function isSeasonsByMonth(values: foundry.data.CalendarConfigSeason[]): values is SeasonByMonth[] {
-    const first = values[0];
-    return typeof first?.monthStart == 'number'
-        && typeof first.monthEnd == 'number';
-}
-
-export class GregorianCalendar extends foundry.data.CalendarData {
+export class GregorianCalendar extends ImprovedCalendar {
 
     static EPOCH_SECONDS = -62_167_219_200; // Year 0 in seconds since UNIX epoch
 
@@ -58,8 +35,24 @@ export class GregorianCalendar extends foundry.data.CalendarData {
         );
     }
 
+    override daysInYear(year: number): number {
+        return this.isLeapYear(year) ? 366 : 365;
+    }
+
+    override endOfWeek(components: TimeComponents): TimeComponents {
+        const date = this.componentsToDate(components);
+        date.setDate(date.getDate() + this.endOfWeekDelta(components));
+        return this.timeToComponents(this.dateToTime(date));
+    }
+
     override isLeapYear(year: number): boolean {
         return year % 400 === 0 || year % 4 === 0 && year % 100 !== 0;
+    }
+
+    override startOfWeek(components: TimeComponents): TimeComponents {
+        const date = this.componentsToDate(components);
+        date.setDate(date.getDate() - this.startOfWeekDelta(components));
+        return this.timeToComponents(this.dateToTime(date));
     }
 
     override timeToComponents(seconds = 0): TimeComponents {
@@ -88,21 +81,6 @@ export class GregorianCalendar extends foundry.data.CalendarData {
         return components;
     }
 
-    componentsToSeason(components: TimeComponents): number | undefined {
-        if (!this.seasons?.values) {
-            return;
-        }
-
-        if (isSeasonsByDay(this.seasons.values)) {
-            return this.seasonByDay(components.day, this.seasons.values);
-        } else if (isSeasonsByMonth(this.seasons.values)) {
-            return this.seasonByMonth(components.month, this.seasons.values);
-        }
-
-        console.warn(`Calendar ${this.name} has invalid season data`);
-        return;
-    }
-
     protected componentsToDate(components: TimeComponents): Date {
         const {
             day, dayOfMonth, hour, minute, month, second, year,
@@ -124,27 +102,6 @@ export class GregorianCalendar extends foundry.data.CalendarData {
 
     protected dateToTime(date: Date): number {
         return Math.floor(date.getTime() / 1000) - this.epoch_seconds;
-    }
-
-    protected seasonByDay(day: number, seasons: SeasonByDay[]): number | undefined {
-        const season = seasons.findIndex(s =>
-            s.dayEnd >= s.dayStart
-                ? day >= s.dayStart && day <= s.dayEnd
-                : day >= s.dayStart || day <= s.dayEnd);
-
-        return season === -1 ? undefined : season;
-    }
-
-    protected seasonByMonth(monthIndex: number, seasons: SeasonByMonth[]): number | undefined {
-        const month = this.months?.values[monthIndex]?.ordinal;
-        if (month === undefined) { return undefined; }
-
-        const season = seasons.findIndex(s =>
-            s.monthEnd >= s.monthStart
-                ? month >= s.monthStart && month <= s.monthEnd
-                : month >= s.monthStart || month <= s.monthEnd);
-
-        return season === -1 ? undefined : season;
     }
 
     protected timeToDate(seconds: number): Date {

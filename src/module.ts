@@ -1,33 +1,58 @@
-import type { TimeComponents } from 'foundry-pf2e/foundry/client/data/_types.mjs';
+import ModuleJson from '../module.json' with { type: 'json' };
+const MODULE = ModuleJson.id;
 
 import { AbsalomReckoning } from './configs';
 import * as Formatters from './formatting/formatters';
 import { GregorianCalendar } from './gregorian-calendar';
-import { CalendarPF2e } from './pf2e-calendar';
+import { ImprovedCalendar } from './improved-calendar';
+import { CalendarPF2e, isCalendarConfigPF2e } from './pf2e-calendar';
+import type { CalendarCompatModule } from './types';
+import { isCalendarPF2e } from './types';
 
-export interface Time {
-    earthCalendarClass: typeof foundry.data.CalendarData;
-    earthCalendarConfig: foundry.data.CalendarConfig;
-
-    worldCalendarClass: typeof foundry.data.CalendarData;
-    worldCalendarConfig: foundry.data.CalendarConfig;
-
-    formatters: Record<string, (calendar: foundry.data.CalendarData, components: TimeComponents, options?: Intl.DateTimeFormatOptions) => string>;
-}
+import './tests/quench';
 
 Hooks.on('init', () => {
-    const config = CONFIG.time as unknown as Time;
-
-    config.worldCalendarConfig = AbsalomReckoning as foundry.data.CalendarConfig;
-    config.worldCalendarClass = CalendarPF2e as typeof foundry.data.CalendarData;
-    config.earthCalendarClass = GregorianCalendar as typeof foundry.data.CalendarData;
+    CONFIG.time.worldCalendarConfig = AbsalomReckoning;
+    CONFIG.time.worldCalendarClass = CalendarPF2e;
+    CONFIG.time.earthCalendarClass = GregorianCalendar;
 
     for (const [name, func] of Object.entries(Formatters)) {
-        config.formatters[name] = func;
+        CONFIG.time.formatters[name] = func;
+    }
+
+    const module = game.modules.get<CalendarCompatModule>(MODULE);
+    if (module) {
+        module.isCalendarPF2e = isCalendarPF2e;
+        module.AbsalomReckoning = AbsalomReckoning;
+        module.CalendarPF2e = CalendarPF2e;
+        module.GregorianCalendar = GregorianCalendar;
+        module.ImprovedCalendar = ImprovedCalendar;
     }
 
     // FIXME
     CONFIG.compatibility.mode = CONST.COMPATIBILITY_MODES.SILENT;
 });
 
-import './tests/quench';
+function localizeCalendarConfig(config: foundry.data.types.CalendarConfig): void {
+    if (isCalendarConfigPF2e(config)) {
+        config.name = game.i18n.localize(config.name);
+        config.era &&= game.i18n.localize(config.era);
+    }
+}
+
+Hooks.on('i18nInit', () => {
+    localizeCalendarConfig(CONFIG.time.worldCalendarConfig);
+});
+
+// Hooks.on('ready', () => {
+//     localizeCalendarConfig(AbsalomReckoning);
+
+//     CONFIG.time.worldCalendarConfig = AbsalomReckoning;
+//     CONFIG.time.worldCalendarClass = CalendarPF2e;
+//     CONFIG.time.earthCalendarClass = GregorianCalendar;
+//     game.time.initializeCalendar();
+
+//     for (const [name, func] of Object.entries(Formatters)) {
+//         CONFIG.time.formatters[name] = func;
+//     }
+// });

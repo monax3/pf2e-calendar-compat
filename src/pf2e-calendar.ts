@@ -1,4 +1,5 @@
-import type { TimeComponents } from './formatting/_types';
+import type { TimeComponents } from 'pf2e-types/foundry/data/types';
+
 import { GregorianCalendar } from './gregorian-calendar';
 
 type CalendarDataSchemaPF2e = foundry.data.CalendarDataSchema & {
@@ -8,12 +9,19 @@ type CalendarDataSchemaPF2e = foundry.data.CalendarDataSchema & {
 
 export type CalendarConfigPF2e = foundry.data.fields.ModelPropsFromSchema<CalendarDataSchemaPF2e>;
 
+export function isCalendarConfigPF2e(config: foundry.data.types.CalendarConfig): config is CalendarConfigPF2e {
+    return 'era' in config && 'gregorianOffset' in config;
+}
+
 export class CalendarPF2e extends GregorianCalendar {
 
+    declare readonly _source: foundry.data.fields.SourceFromSchema<CalendarDataSchemaPF2e>;
     declare era?: string;
     declare gregorianOffset?: number;
 
     #worldCreatedOn?: Date = undefined;
+
+    pf2e = true;
 
     get eraName(): string {
         return this.era ? game.i18n.localize(this.era) : '';
@@ -48,6 +56,14 @@ export class CalendarPF2e extends GregorianCalendar {
             : year - this.gregorianOffset;
 
         return super.isLeapYear(gregorianYear);
+    }
+
+    override get name(): string {
+        return game.i18n.localize(this._source.name);
+    }
+
+    override set name(value: string) {
+        // do nothing
     }
 
     override timeToComponents(seconds = 0): TimeComponents {

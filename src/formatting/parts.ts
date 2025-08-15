@@ -1,6 +1,9 @@
+import type { CalendarData } from 'pf2e-types/foundry/data';
+import type { TimeComponents } from 'pf2e-types/foundry/data/types';
+
 import { ordinalString } from '../date';
 
-import type { DateTimeFormatOptions, Part, TimeComponents } from './_types';
+import type { DateTimeFormatOptions, Part } from './_types';
 
 export function era(
     value: string,
@@ -18,7 +21,7 @@ export function era(
 }
 
 export function month(
-    calendar: foundry.data.CalendarData,
+    calendar: CalendarData,
     components: TimeComponents,
     options: DateTimeFormatOptions['month'],
 ): Part {
@@ -63,7 +66,7 @@ function handlePreEraYears(year: number): number {
     return year > 0 ? year : year - 1;
 }
 
-export function amPm(calendar: foundry.data.CalendarData, components: TimeComponents, options: DateTimeFormatOptions): Part {
+export function amPm(calendar: CalendarData, components: TimeComponents, options: DateTimeFormatOptions): Part {
     if (options.hour12) {
         if (components.hour < 12) { return { type: 'hour12', text: 'AM' }; } else { return { type: 'hour12', text: 'PM' }; }
     } else {
@@ -79,7 +82,7 @@ export function blanked(type: Part['type'], text: string): Part {
 
 export function eraYear(
     eraName: string,
-    calendar: foundry.data.CalendarData,
+    calendar: CalendarData,
     components: TimeComponents,
     options: DateTimeFormatOptions,
 ): Part {
@@ -100,7 +103,7 @@ export function getDateSeparator(options: DateTimeFormatOptions): string {
 }
 
 export function hour(
-    calendar: foundry.data.CalendarData,
+    calendar: CalendarData,
     components: TimeComponents,
     options: DateTimeFormatOptions,
 ): Part {
@@ -143,7 +146,7 @@ export function toHour12(value: number): number {
 }
 
 export function weekday(
-    calendar: foundry.data.CalendarData,
+    calendar: CalendarData,
     components: TimeComponents,
     options: DateTimeFormatOptions['weekday'],
 ): Part {

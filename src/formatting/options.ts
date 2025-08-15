@@ -35,14 +35,17 @@ function getTimeStyle(timeStyle?: Intl.DateTimeFormatOptions['timeStyle']): Intl
 const FULL_FORMAT = { dateStyle: 'full', timeStyle: 'full' } satisfies Intl.DateTimeFormatOptions;
 
 export function prepareOptions(options: DateTimeFormatOptions = FULL_FORMAT): DateTimeFormatOptions {
-    const CORE_KEYS = ['timeStyle',
+    const CORE_KEYS = [
+        'timeStyle',
         'hour',
         'minute',
         'second',
         'dateStyle',
         'year',
         'month',
-        'second'] as const;
+        'second',
+        'weekday',
+    ] as const;
     const useDefault = CORE_KEYS.some(key => options[key] !== undefined);
 
     return useDefault
