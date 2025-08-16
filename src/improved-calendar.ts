@@ -82,8 +82,8 @@ export class ImprovedCalendar extends foundry.data.CalendarData {
         }
 
         while (day >= this.daysInYear(year)) {
-            year += 1;
             day -= this.daysInYear(year);
+            year += 1;
         }
 
         return this.resolvePartialComponents({ day, year });
