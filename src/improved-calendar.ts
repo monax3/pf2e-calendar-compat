@@ -133,7 +133,7 @@ export class ImprovedCalendar extends foundry.data.CalendarData {
 
     endOfMonth(components: TimeComponents): TimeComponents {
         const dayOfMonth = this.daysInMonth(components.month, components.year) - 1;
-        return { ...components, dayOfMonth };
+        return this.resolvePartialComponents({ dayOfMonth, month: components.month, year: components.year });
     }
 
     endOfWeek(components: TimeComponents): TimeComponents {
@@ -141,7 +141,7 @@ export class ImprovedCalendar extends foundry.data.CalendarData {
     }
 
     startOfMonth(components: TimeComponents): TimeComponents {
-        return { ...components, dayOfMonth: 0 };
+        return this.resolvePartialComponents({ dayOfMonth: 0, month: components.month, year: components.year });
     }
 
     startOfWeek(components: TimeComponents): TimeComponents {
