@@ -17,7 +17,7 @@ import type {
 import type { CalendarConfig, TimeComponents } from 'pf2e-types/foundry/data/types';
 import { clone, mergeDeep } from 'remeda';
 
-import type { Formatter } from './formatting/_types';
+import type { Formatter } from 'pf2e-calendar-compat';
 
 const worldClock = mergeDeep({
     AD: { yearOffset: -95 },
@@ -236,10 +236,10 @@ globalThis.foundry = {
     },
 };
 
-const { GregorianCalendar } = await import('./gregorian-calendar');
-const { CalendarPF2e } = await import('./pf2e-calendar');
-const { AbsalomReckoning } = await import('./configs');
-const Formatters = await import('./formatting/formatters');
+const { GregorianCalendar } = await import('./src/gregorian-calendar');
+const { CalendarPF2e } = await import('./src/pf2e-calendar');
+const { AbsalomReckoning } = await import('./src/configs');
+const Formatters = await import('./src/formatting/formatters');
 CONFIG.time = { formatters: Formatters } as any;
 
 globalThis.game.time = new class {
@@ -279,10 +279,10 @@ Object.defineProperty(String.prototype, 'capitalize', {
     },
 });
 
-import AR from './tests/absalom-reckoning';
+import AR from './src/tests/absalom-reckoning';
 AR({ assert, describe, it });
 
-import GC from './tests/gregorian-calendar';
+import GC from './src/tests/gregorian-calendar';
 GC({ assert, describe, it });
 
 // describe('test 26387388', { skip: false }, () => {

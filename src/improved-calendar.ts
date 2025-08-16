@@ -1,4 +1,6 @@
-import type { CalendarConfigSeason, TimeComponents } from 'pf2e-types/foundry/data/types';
+import type { CalendarConfigSeason, TimeComponents, TimeFormatter } from 'pf2e-types/foundry/data/types';
+
+import type { FormatterOptions, Formatters } from './formatting/_types';
 
 interface SeasonByDay extends CalendarConfigSeason {
     dayEnd: number;
@@ -87,6 +89,12 @@ export class ImprovedCalendar extends foundry.data.CalendarData {
     }
 
     // Date helpers
+
+    override format<F extends Formatters>(time: number, formatter: F, options: FormatterOptions[F]): string;
+    override format(time?: number | TimeComponents, formatter?: string | TimeFormatter, options?: object): string;
+    override format(time?: number | TimeComponents, formatter?: string | TimeFormatter, options?: object): string {
+        return super.format(time, formatter, options);
+    }
 
     addDays(components: TimeComponents, days: number): TimeComponents {
         let year = components.year;
