@@ -10,10 +10,13 @@ interface SeasonByMonth extends CalendarConfigSeason {
 export declare class ImprovedCalendar extends foundry.data.CalendarData {
     get daysInWeek(): number;
     get firstWeekday(): number;
+    get monthsInYear(): number;
     componentsToSeason(components: TimeComponents): number | undefined;
+    daysInMonth(month: number, year?: number): number;
     daysInYear(year: number): number;
     timeFromOrdinalDate(year: number, month: number, day: number): number;
     addDays(components: TimeComponents, days: number): TimeComponents;
+    addMonths(components: TimeComponents, months: number): TimeComponents;
     endOfMonth(components: TimeComponents): TimeComponents;
     endOfWeek(components: TimeComponents): TimeComponents;
     startOfMonth(components: TimeComponents): TimeComponents;

@@ -34,6 +34,10 @@ export class ImprovedCalendar extends foundry.data.CalendarData {
         return this.years.firstWeekday;
     }
 
+    get monthsInYear(): number {
+        return this.months?.values.length ?? 1;
+    }
+
     componentsToSeason(components: TimeComponents): number | undefined {
         if (!this.seasons?.values) {
             return;
@@ -47,6 +51,18 @@ export class ImprovedCalendar extends foundry.data.CalendarData {
 
         console.warn(`Calendar ${this.name} has invalid season data`);
         return;
+    }
+
+    daysInMonth(month: number, year?: number): number {
+        const data = this.months?.values[month];
+
+        if (data === undefined) {
+            console.warn('Calendar does not have a definition for this month');
+            return 0;
+        }
+
+        const isLeapYear = year === undefined ? false : this.isLeapYear(year);
+        return isLeapYear ? data.leapDays ?? data.days : data.days;
     }
 
     daysInYear(year: number): number {
@@ -89,13 +105,26 @@ export class ImprovedCalendar extends foundry.data.CalendarData {
         return this.resolvePartialComponents({ day, year });
     }
 
-    endOfMonth(components: TimeComponents): TimeComponents {
-        const month = this.months?.values[components.month];
-        if (month === undefined) {
-            return components;
+    addMonths(components: TimeComponents, months: number): TimeComponents {
+        let year = components.year;
+        let month = components.month + months;
+
+        while (month < 0) {
+            year -= 1;
+            month += this.monthsInYear;
         }
 
-        const dayOfMonth = components.leapYear ? month.leapDays ?? month.days : month.days;
+        while (month >= this.monthsInYear) {
+            month -= this.monthsInYear;
+            year += 1;
+        }
+
+        const dayMax = this.daysInMonth(month, year) - 1;
+        return this.resolvePartialComponents({ day: Math.min(dayMax, components.dayOfMonth), month, year });
+    }
+
+    endOfMonth(components: TimeComponents): TimeComponents {
+        const dayOfMonth = this.daysInMonth(components.month, components.year) - 1;
         return { ...components, dayOfMonth };
     }
 
