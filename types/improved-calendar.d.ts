@@ -12,9 +12,11 @@ export declare class ImprovedCalendar extends foundry.data.CalendarData {
     get firstWeekday(): number;
     componentsToSeason(components: TimeComponents): number | undefined;
     daysInYear(year: number): number;
-    endOfWeek(components: TimeComponents): TimeComponents;
-    startOfWeek(components: TimeComponents): TimeComponents;
     timeFromOrdinalDate(year: number, month: number, day: number): number;
+    endOfMonth(components: TimeComponents): TimeComponents;
+    endOfWeek(components: TimeComponents): TimeComponents;
+    startOfMonth(components: TimeComponents): TimeComponents;
+    startOfWeek(components: TimeComponents): TimeComponents;
     protected endOfWeekDelta(components: TimeComponents): number;
     protected resolvePartialComponents(components: Partial<TimeComponents>): TimeComponents;
     protected seasonByDay(day: number, seasons: SeasonByDay[]): number | undefined;

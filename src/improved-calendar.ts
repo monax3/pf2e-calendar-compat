@@ -62,6 +62,26 @@ export class ImprovedCalendar extends foundry.data.CalendarData {
         return days;
     }
 
+    timeFromOrdinalDate(year: number, month: number, day: number): number {
+        return this.componentsToTime({
+            dayOfMonth: day - 1,
+            month: month - 1,
+            year,
+        });
+    }
+
+    // Date helpers
+
+    endOfMonth(components: TimeComponents): TimeComponents {
+        const month = this.months?.values[components.month];
+        if (month === undefined) {
+            return components;
+        }
+
+        const dayOfMonth = components.leapYear ? month.leapDays ?? month.days : month.days;
+        return { ...components, dayOfMonth };
+    }
+
     endOfWeek(components: TimeComponents): TimeComponents {
         const day = components.day + this.endOfWeekDelta(components);
 
@@ -73,6 +93,10 @@ export class ImprovedCalendar extends foundry.data.CalendarData {
         return this.resolvePartialComponents(outComponents);
     }
 
+    startOfMonth(components: TimeComponents): TimeComponents {
+        return { ...components, dayOfMonth: 0 };
+    }
+
     startOfWeek(components: TimeComponents): TimeComponents {
         const day = components.day - this.startOfWeekDelta(components);
         const outComponents = day < 0
@@ -80,14 +104,6 @@ export class ImprovedCalendar extends foundry.data.CalendarData {
             : { day, year: components.year };
 
         return this.resolvePartialComponents(outComponents);
-    }
-
-    timeFromOrdinalDate(year: number, month: number, day: number): number {
-        return this.componentsToTime({
-            dayOfMonth: day - 1,
-            month: month - 1,
-            year,
-        });
     }
 
     protected endOfWeekDelta(components: TimeComponents): number {
