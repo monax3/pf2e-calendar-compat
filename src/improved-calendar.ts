@@ -72,6 +72,23 @@ export class ImprovedCalendar extends foundry.data.CalendarData {
 
     // Date helpers
 
+    addDays(components: TimeComponents, days: number): TimeComponents {
+        let year = components.year;
+        let day = components.day + days;
+
+        while (day < 0) {
+            year -= 1;
+            day += this.daysInYear(year);
+        }
+
+        while (day >= this.daysInYear(year)) {
+            year += 1;
+            day -= this.daysInYear(year);
+        }
+
+        return this.resolvePartialComponents({ day, year });
+    }
+
     endOfMonth(components: TimeComponents): TimeComponents {
         const month = this.months?.values[components.month];
         if (month === undefined) {
@@ -83,14 +100,7 @@ export class ImprovedCalendar extends foundry.data.CalendarData {
     }
 
     endOfWeek(components: TimeComponents): TimeComponents {
-        const day = components.day + this.endOfWeekDelta(components);
-
-        const daysInYear = this.daysInYear(components.year);
-        const outComponents = day >= daysInYear
-            ? { day: day - daysInYear, year: components.year + 1 }
-            : { day, year: components.year };
-
-        return this.resolvePartialComponents(outComponents);
+        return this.addDays(components, this.endOfWeekDelta(components));
     }
 
     startOfMonth(components: TimeComponents): TimeComponents {
@@ -98,12 +108,7 @@ export class ImprovedCalendar extends foundry.data.CalendarData {
     }
 
     startOfWeek(components: TimeComponents): TimeComponents {
-        const day = components.day - this.startOfWeekDelta(components);
-        const outComponents = day < 0
-            ? { day: this.daysInYear(components.year - 1) + day, year: components.year - 1 }
-            : { day, year: components.year };
-
-        return this.resolvePartialComponents(outComponents);
+        return this.addDays(components, -this.startOfWeekDelta(components));
     }
 
     protected endOfWeekDelta(components: TimeComponents): number {

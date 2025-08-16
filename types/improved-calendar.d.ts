@@ -13,6 +13,7 @@ export declare class ImprovedCalendar extends foundry.data.CalendarData {
     componentsToSeason(components: TimeComponents): number | undefined;
     daysInYear(year: number): number;
     timeFromOrdinalDate(year: number, month: number, day: number): number;
+    addDays(components: TimeComponents, days: number): TimeComponents;
     endOfMonth(components: TimeComponents): TimeComponents;
     endOfWeek(components: TimeComponents): TimeComponents;
     startOfMonth(components: TimeComponents): TimeComponents;
